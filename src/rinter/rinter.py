@@ -50,6 +50,7 @@ REQUIRED_HEADER_SECTIONS = [
     'Errors handled',
     'Limitations'
     ]
+INDENTATION_LEVEL = re.compile(' {3}')
 
 def file_contains_header(line):
     """ Return True if file contains a comment block at the start. """
@@ -90,7 +91,7 @@ def all_lines_eighty_characters(line):
 
 def no_global_functions(line):
     funcs = parse_functions_with_bodies(line)
-    ranges = [(a[1], a[2]) for a in funcs]
+    ranges = [a.span() for a in funcs]
     line2 = replace_given_ranges(line, ranges)
     ret = []
     for proto in re.finditer(FUNCTION_PROTOTYPE, line2):
@@ -102,15 +103,14 @@ def two_lines_before_functions(line):
     ss = re.compile('\s{2,}')
     blanks = re.finditer(ss, line)
     blanks = filter(lambda x : x.group().count('\n') >= 2, blanks)
-    blanks = map(lambda x: x.span(), blanks)
-    funcs = map( lambda x: (x[1], x[2]), parse_functions_with_bodies(line))
-    ret = []
+    blanks = [a for a in blanks]
+    funcs = parse_functions_with_bodies(line)
+    ret = list()
     for func in funcs:
-        # see if it comes _immediately_ before a function
-        has_two = False
-        for blank in blanks:
-            if blank[1] == func[0]:
-                has_two = True
-        if not has_two:
-            ret.append('Two spaces before function {}'.format(func[0]))
+        f = glue_backward(func, blanks)
+        if f.group() == func.group():
+            ret.append('Two spaces before function {}'.format(func.span()[0]))
     return ret or None
+
+def indentation_level_three_spaces(line):
+    pass

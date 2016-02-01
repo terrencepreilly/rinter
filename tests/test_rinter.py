@@ -51,7 +51,7 @@ class TestUtilityMethods(unittest.TestCase):
         line = load_file('test_good_program.c')
         functions = [a for a in parse_functions_with_bodies(line)]
         self.assertEqual(len(functions), 3)
-        self.assertNotEqual(functions[0][1], 0)
+        self.assertNotEqual(functions[0].span()[0], 0)
         line2 = load_file('test_bad_program.c')
         functions2 = [a for a in parse_functions_with_bodies(line2)]
         self.assertEqual(len(functions2), 3)
@@ -91,6 +91,22 @@ class TestUtilityMethods(unittest.TestCase):
         self.assertEqual(len(l), len(l2))
         self.assertTrue(l2[5:10].isspace())
         self.assertTrue('b' not in l2)
+
+    def test_parse_structs(self):
+        structfile = load_file('test_structs.c')
+        structs = parse_structs(structfile)
+        self.assertEqual(len(structs), 4)
+        self.assertTrue(structs[0].group().startswith('define'))
+        self.assertTrue(structs[1].group().startswith('struct'))
+
+    def test_parse_ifs(self):
+        iffile = load_file('test_ifs.c')
+        ifs = parse_ifs(iffile)
+        self.assertEqual(len(ifs), 4)
+        self.assertTrue('else if' in ifs[0].group())
+
+    def test_parse_fors(self):
+        pass
 
 
 class TestDocumentationMethods(unittest.TestCase):
@@ -136,8 +152,8 @@ class TestDocumentationMethods(unittest.TestCase):
     def test_indentation_level_three_spaces(self):
         self.assertTrue(indentation_level_three_spaces(self.good_program)
             is None)
-        self.assertEqual(len(indentation_level_three_spaces(self.bad_program),
-            9))
+        self.assertEqual(len(indentation_level_three_spaces(self.bad_program)),
+            9)
 
     #### FUNCTION TESTS #######################################################
 
