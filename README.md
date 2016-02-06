@@ -2,25 +2,9 @@ Rinter is a utility to check for formatting heresy, as defined by the High
 Priest of the Eighth Day of our Lord.
 
 Among the items checked by rinter:
+
     * File contains header with name, section, assignment #, due date,
-      and total points in the following format:
-        /*
-           Name: ********* *********
-           Section: #########
-           Assignment: **************
-           Due Date: ****(*****) (#)#, ####
-           Credit: ## points
-
-           Problem: ***** **** ...
-
-           Solution: ***** **** ...
-
-           Errors handled: ****** ****...
-
-           Limitations: ****** ****...
-
-           (Acknowledgement: ***** ****...)
-
+      and total points.
     * Comments are present before each function, and do not occur in the
       body of a function.
     * All lines are under 80 characters long.
