@@ -117,8 +117,6 @@ class TestDocumentationMethods(unittest.TestCase):
         self.good_function = load_file('test_good_function.c')
         self.bad_program = load_file('test_bad_program.c')
 
-    #### WHOLE PROGRAM TESTS ##################################################
-
     def test_file_contains_header(self):
         self.assertTrue(file_contains_header(self.good_program))
         self.assertFalse(file_contains_header(self.bad_program))
@@ -131,14 +129,18 @@ class TestDocumentationMethods(unittest.TestCase):
         rfield_n = len(REQUIRED_HEADER_SECTIONS)
         b1errors = header_contains_necessary_fields(b1)
         b2errors = header_contains_necessary_fields(b2)
-        #self.assertEqual(len(b1errors), rfield_n-1) # Not working!
-        #self.assertEqual(len(b2errors), rfield_n-3) # Not working!
-        #self.assertTrue(header_contains_necessary_fields(c1) is None)
+        c1errors = header_contains_necessary_fields(c1)
+        self.assertEqual(len(b1errors), rfield_n-1)
+        self.assertEqual(len(b2errors), rfield_n-3)
+        self.assertEqual(len(c1errors), rfield_n-9)
+
+        program_h = get_file_header(self.good_program).group()
+        self.assertEqual(len(header_contains_necessary_fields(program_h)), 0)
 
     def test_all_lines_eighty_characters(self):
-        self.assertTrue(all_lines_eighty_characters(self.good_program))
-        self.assertFalse(all_lines_eighty_characters(self.bad_program))
-        self.assertFalse(all_lines_eighty_characters('a'*81 + '\n'))
+        self.assertEqual(all_lines_eighty_characters(self.good_program), [])
+        self.assertEqual(len(all_lines_eighty_characters(self.bad_program)), 1)
+        self.assertEqual(len(all_lines_eighty_characters('a'*81 + '\n')), 1)
 
     def test_no_global_functions(self):
         self.assertTrue(no_global_functions(self.good_program) is None)
@@ -158,7 +160,11 @@ class TestDocumentationMethods(unittest.TestCase):
     #### FUNCTION TESTS #######################################################
 
     def test_comment_before_function(self):
-        pass
+        good = comment_before_function(self.good_program)
+        bad = comment_before_function(self.bad_program)
+        self.assertEqual(len(good), 0)
+        self.assertEqual(len(bad), 1)
+        self.assertTrue('main' in bad[0])
 
     def test_no_comment_within_function(self):
         pass

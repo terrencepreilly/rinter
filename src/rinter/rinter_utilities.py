@@ -8,6 +8,7 @@ import re
 BLOCK = '\{[^\}]*\}'
 PAREN = '\([^\)]*\)'
 COMMENT = re.compile('\/\*+[\s\S]*?\*\/')
+INLINE_COMMENT = re.compile('\/\/[^\n]*')
 FUNCTION_START = re.compile('\w+\s+\w+' + PAREN + '\s*\{')
 FUNCTION_PROTOTYPE = re.compile('\w+\s+\w+' + PAREN + ';')
 OPERATORS = '\+\-\/\*\(\)\%\~\|\^\&\<\>\?\:'
@@ -192,6 +193,46 @@ def parse_ifs(line):
     for a in range(len(i)):
         i[a] = glue_forward(i[a], e)
     return i
+
+def function_name_from_body(line):
+    """ Given a function declaration, give the name of the function. """
+    func_regex = re.compile('(\w+)\s?\(')
+    return re.findall(func_regex, line)[0]
+
+
+def parse_function_blocks(line):
+    """ Return all function blocks in line. """
+    funcs = parse_functions_with_bodies(line)
+    ret = []
+    for func in funcs:
+        i = line.find('{', func.span()[0], func.span()[1])
+        ret.append(parse_block(line, i))
+    return ret
+
+def parse_function_block(line, span):
+    """ Return the block in the given span. """
+    i = line.find('{', span[0], span[1])
+    return parse_block(line, i)
+
+def find_all_comments(line, span=None):
+    """ Find all block and inline comments in the span. """
+    if span is None:
+        span = (0, len(line))
+    ret = list()
+    bc_gen = re.finditer(COMMENT, line[span[0]:span[1]])
+    ic_gen = re.finditer(INLINE_COMMENT, line[span[0]:span[1]])
+    for block_comment in bc_gen:
+        rmin, rmax = block_comment.span()
+        rmin += span[0]
+        rmax += span[0]
+        ret.append((rmin, rmax))
+    for inline_comment in ic_gen:
+        rmin, rmax = inline_comment.span()
+        rmin += span[0]
+        rmax += span[0]
+        ret.append((rmin, rmax))
+    ret.sort()
+    return ret
 
 def parse_fors(line):
     pass

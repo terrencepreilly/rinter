@@ -13,4 +13,9 @@ setup(
     packages=find_packages('src'),
     package_dir={'': 'src'},
     py_modules=[path.splitext(path.basename(i))[0] for i in glob('src/*.py')],
+    entry_points={
+        'console_scripts': [
+            'rinter = rinter.rinter:_main',
+        ],
+    },
 )
